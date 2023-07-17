@@ -1,0 +1,212 @@
+- id: "1645864074460"
+  alias: SP juhtimine Shelly on
+  description: ""
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.pumba_taimer
+  condition:
+    - condition: state
+      entity_id: binary_sensor.pumba_taimer
+      state: "on"
+  action:
+    - type: turn_off
+      device_id: --shelly id--
+      entity_id: switch.shelly1_c45bbe782561
+      domain: switch
+  mode: restart
+- id: "1645865181322"
+  alias: SP juhtimine Shelly off
+  description: ""
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.pumba_taimer
+  condition:
+    - condition: state
+      entity_id: binary_sensor.pumba_taimer
+      state: "off"
+  action:
+    - type: turn_on
+      device_id: --shelly id--
+      entity_id: switch.shelly1_c45bbe782561
+      domain: switch
+  mode: restart
+- id: "1645866598295"
+  alias: Sp juhtimine Shelly kontroll
+  trigger:
+    - platform: time
+      at:
+        - 00:01:00
+  condition:
+    - condition: state
+      entity_id: binary_sensor.pumba_taimer
+      state: "on"
+  action:
+    - type: turn_off
+      device_id: --shelly id--
+      entity_id: switch.shelly1_c45bbe782561
+      domain: switch
+  mode: single
+- id: "1688812217588"
+  alias: Huawei limit
+  description:
+    Alla selle NPS elektrihinna lülitab Huawei inverteri 0 võrku tootmise peale
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.nordpool_mwh_ee_eur_3_10_02
+      below: 0.1
+  condition: []
+  action:
+    - service: huawei_solar.set_maximum_feed_grid_power_percent
+      data:
+        power_percentage: 0
+        device_id: --inverteri id--
+  mode: single
+- id: "1688812283766"
+  alias: Huawei unlimited
+  description:
+    Sellesr kõrgema NPS elektrihinna puhul lülitab Huawei inverteri max tootmise peale
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.nordpool_mwh_ee_eur_3_10_02
+      above: 0.1
+  condition: []
+  action:
+    - service: huawei_solar.reset_maximum_feed_grid_power
+      data:
+        device_id: --inverteri id--
+    - delay: 00:05:00
+  mode: single
+- id: "1689431668801"
+  alias: Huawei seisma öise võrgutasu ajal
+  description: Huawei seisma ja tööle päevad tunnid elektri, selle marginaali ja võrgupaketi MWh maksumuse järgi
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.nordpool_mwh_ee_eur_3_10_02
+      below: -43.8
+  condition:
+    - condition: or
+      conditions:
+        - condition: time
+          after: "22:00:00"
+          before: 07:00:00
+          weekday:
+            - mon
+            - tue
+            - wed
+            - thu
+            - fri
+        - condition: time
+          weekday:
+            - sun
+            - sat
+  action:
+    - type: turn_off
+      device_id: --inverteri id--
+      entity_id: switch.inverter_inverter_on_off
+      domain: switch
+    - delay: 00:01:00
+  mode: single
+- id: "1689433790522"
+  alias: Huawei seisma päevase võrgutasu ajal
+  description: Huawei seisma ja tööle päevad tunnid elektri, selle marginaali ja võrgupaketi MWh maksumuse järgi
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.nordpool_mwh_ee_eur_3_10_02
+      below: -72.4
+  condition:
+    - condition: time
+      after: 07:00:00
+      before: "22:00:00"
+      weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+  action:
+    - type: turn_off
+      device_id: --inverteri id--
+      entity_id: switch.inverter_inverter_on_off
+      domain: switch
+    - delay: 00:01:00
+  mode: single
+- id: "1689434322002"
+  alias: Huawei tööle öise võrgutasu ajal
+  description: Huawei seisma ja tööle päevad tunnid elektri, selle marginaali ja võrgupaketi MWh maksumuse järgi
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.nordpool_mwh_ee_eur_3_10_02
+      above: -43.8
+  condition:
+    - condition: or
+      conditions:
+        - condition: time
+          after: "22:00:00"
+          before: 07:00:00
+          weekday:
+            - mon
+            - tue
+            - wed
+            - thu
+            - fri
+        - condition: time
+          weekday:
+            - sun
+            - sat
+  action:
+    - type: turn_on
+      device_id: --inverteri id--
+      entity_id: switch.inverter_inverter_on_off
+      domain: switch
+  mode: single
+- id: "1689434403883"
+  alias: Huawei tööle päevase võrgutasu ajal
+  description: Huawei seisma ja tööle päevad tunnid elektri, selle marginaali ja võrgupaketi MWh maksumusejärgi
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.nordpool_mwh_ee_eur_3_10_02
+      above: -72.4
+  condition:
+    - condition: time
+      after: 07:00:00
+      before: "22:00:00"
+      weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+  action:
+    - type: turn_on
+      device_id: --inverteri id--
+      entity_id: switch.inverter_inverter_on_off
+      domain: switch
+  mode: single
+- id: "1689423790677"
+  alias: Sma välja
+  description: Alla selle NPS elektrihinna puhul lülitab SMA inverteri Shelly abil välja
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.nordpool_mwh_ee_eur_3_10_02
+      below: 0.1
+  condition: []
+  action:
+    - service: switch.turn_on
+      data: {}
+      target:
+        device_id: --shelly id--
+  mode: single
+- id: "1689423921869"
+  alias: Sma tööle
+  description: Üle selle NPS elektrihinna puhul lülitab SMA inverteri shelly abil sisse
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.nordpool_mwh_ee_eur_3_10_02
+      above: 0.1
+  condition: []
+  action:
+    - service: switch.turn_off
+      data: {}
+      target:
+        device_id: --shelly id--
+  mode: single
